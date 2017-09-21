@@ -1,27 +1,29 @@
 /*
  * RESTHeart - the Web API for MongoDB
  * Copyright (C) SoftInstigate Srl
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.restheart.handlers.applicationlogic;
 
 import com.mongodb.client.MongoCollection;
+
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
 import io.undertow.util.HttpString;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
 import org.bson.BsonDocument;
 import org.bson.BsonInt32;
 import org.bson.BsonObjectId;
@@ -42,9 +45,11 @@ import org.restheart.handlers.PipedHttpHandler;
 import org.restheart.handlers.RequestContext;
 import org.restheart.metadata.NamedSingletonsFactory;
 import org.restheart.metadata.transformers.Transformer;
+
 import static org.restheart.security.handlers.IAuthToken.AUTH_TOKEN_HEADER;
 import static org.restheart.security.handlers.IAuthToken.AUTH_TOKEN_LOCATION_HEADER;
 import static org.restheart.security.handlers.IAuthToken.AUTH_TOKEN_VALID_HEADER;
+
 import org.restheart.utils.HttpStatus;
 import org.restheart.utils.JsonUtils;
 import org.slf4j.Logger;
@@ -191,7 +196,7 @@ public class CsvLoaderHandler extends ApplicationLogicHandler {
         error.put("http status code",
                 new BsonInt32(code));
         error.put("http status description",
-                new BsonString(HttpStatus.getStatusText(code)));
+                new BsonString(HttpStatus.getReasonPhrase(code)));
 
         if (message != null) {
             error.put(
@@ -210,63 +215,67 @@ public class CsvLoaderHandler extends ApplicationLogicHandler {
 
         Scanner scanner = new Scanner(rawContent);
 
-        boolean isHeader = true;
+        try {
+            boolean isHeader = true;
 
-        List<String> cols = null;
+            List<String> cols = null;
 
-        while (scanner.hasNext()) {
-            String line = scanner.nextLine();
+            while (scanner.hasNext()) {
+                String line = scanner.nextLine();
 
-            // split on the separator only if that comma has zero, 
-            // or an even number of quotes ahead of it.
-            List<String> vals = Arrays.asList(line.
-                    split(params.sep + "(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1));
+                // split on the separator only if that comma has zero,
+                // or an even number of quotes ahead of it.
+                List<String> vals = Arrays.asList(line.
+                        split(params.sep + "(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1));
 
-            if (isHeader) {
-                cols = vals;
-            } else {
-                BsonDocument doc = new BsonDocument("_etag", new BsonObjectId());
+                if (isHeader) {
+                    cols = vals;
+                } else {
+                    BsonDocument doc = new BsonDocument("_etag", new BsonObjectId());
 
-                int unnamedProps = 0;
+                    int unnamedProps = 0;
 
-                for (int idx = 0; idx < vals.size(); idx++) {
-                    if (idx == params.idIdx) {
-                        doc.append("_id", getBsonValue(vals.get(params.idIdx)));
-                    } else {
-                        String propname;
-
-                        if (cols.size() <= idx) {
-                            propname = "unnamed_" + unnamedProps;
-                            unnamedProps++;
+                    for (int idx = 0; idx < vals.size(); idx++) {
+                        if (idx == params.idIdx) {
+                            doc.append("_id", getBsonValue(vals.get(params.idIdx)));
                         } else {
-                            propname = cols.get(idx);
+                            String propname;
+
+                            if (cols.size() <= idx) {
+                                propname = "unnamed_" + unnamedProps;
+                                unnamedProps++;
+                            } else {
+                                propname = cols.get(idx);
+                            }
+
+                            doc.append(propname, getBsonValue(vals.get(idx)));
                         }
-
-                        doc.append(propname, getBsonValue(vals.get(idx)));
                     }
+
+                    // add props specified via keys and values qparams
+                    addProps(params, doc);
+
+                    // apply transformer if defined
+                    if (params.transformer != null) {
+                        params.transformer.transform(exchange, context, doc, null);
+                    }
+
+                    ret.add(doc);
                 }
 
-                // add props specified via keys and values qparams
-                addProps(params, doc);
-
-                // apply transformer if defined
-                if (params.transformer != null) {
-                    params.transformer.transform(exchange, context, doc, null);
-                }
-
-                ret.add(doc);
+                isHeader = false;
             }
 
-            isHeader = false;
+            return ret;
+        } finally {
+            scanner.close();
         }
-
-        return ret;
     }
 
     private void addProps(CsvRequestParams params, BsonDocument doc) {
         if (params.props != null && params.values != null) {
-            Deque<String> _props = new ArrayDeque(params.props);
-            Deque<String> _values = new ArrayDeque(params.values);
+            Deque<String> _props = new ArrayDeque<>(params.props);
+            Deque<String> _values = new ArrayDeque<>(params.values);
 
             while (!_props.isEmpty() && !_values.isEmpty()) {
                 doc.append(_props.pop(), getBsonValue(_values.poll()));

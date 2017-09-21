@@ -1,17 +1,17 @@
 /*
  * RESTHeart - the Web API for MongoDB
  * Copyright (C) SoftInstigate Srl
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -19,7 +19,9 @@ package org.restheart.db;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mongodb.client.FindIterable;
+
 import static java.lang.Thread.MIN_PRIORITY;
+
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
@@ -31,11 +33,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 import org.bson.BsonDocument;
+
 import static org.fusesource.jansi.Ansi.Color.GREEN;
 import static org.fusesource.jansi.Ansi.Color.RED;
 import static org.fusesource.jansi.Ansi.Color.YELLOW;
 import static org.fusesource.jansi.Ansi.ansi;
+
 import org.restheart.Bootstrapper;
 import org.restheart.cache.Cache;
 import org.restheart.cache.CacheFactory;
@@ -70,7 +75,7 @@ public class CursorPool {
             = new ThreadPoolExecutor(
                     1, 2,
                     1, TimeUnit.MINUTES,
-                    new ArrayBlockingQueue(1),
+                    new ArrayBlockingQueue<>(1),
                     new ThreadFactoryBuilder()
                             .setDaemon(true)
                             .setNameFormat("cursor-pool-populator-%d")
@@ -101,6 +106,7 @@ public class CursorPool {
     private final Cache<CursorPoolEntryKey, FindIterable<BsonDocument>> cache;
     private final LoadingCache<CursorPoolEntryKey, Long> collSizes;
 
+    @SuppressWarnings("unchecked")
     private CursorPool(DbsDAO dbsDAO) {
         this.dbsDAO = dbsDAO;
 
@@ -225,6 +231,7 @@ public class CursorPool {
 
                     for (long cont = tocreate; cont > 0; cont--) {
                         // create the first cursor
+                        @SuppressWarnings("unchecked")
                         FindIterable<BsonDocument> cursor = dbsDAO
                                 .getFindIterable(
                                         key.getCollection(),
@@ -301,6 +308,7 @@ public class CursorPool {
                     long existing = getSliceHeight(sliceKey);
 
                     if (existing == 0) {
+                        @SuppressWarnings("unchecked")
                         FindIterable<BsonDocument> cursor = dbsDAO
                                 .getFindIterable(
                                         key.getCollection(),

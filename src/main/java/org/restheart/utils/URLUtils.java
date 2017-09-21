@@ -1,29 +1,32 @@
 /*
  * RESTHeart - the Web API for MongoDB
  * Copyright (C) SoftInstigate Srl
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.restheart.utils;
 
+import static org.restheart.handlers.RequestContext.DOC_ID_TYPE_QPARAM_KEY;
 import io.undertow.server.HttpServerExchange;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Deque;
 import java.util.Objects;
+
 import org.bson.BsonBoolean;
 import org.bson.BsonDateTime;
 import org.bson.BsonDouble;
@@ -43,8 +46,6 @@ import org.bson.types.ObjectId;
 import org.restheart.hal.UnsupportedDocumentIdException;
 import org.restheart.handlers.RequestContext;
 import org.restheart.handlers.RequestContext.DOC_ID_TYPE;
-import static org.restheart.handlers.RequestContext.DOC_ID_TYPE.STRING;
-import static org.restheart.handlers.RequestContext.DOC_ID_TYPE_QPARAM_KEY;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -380,6 +381,10 @@ public class URLUtils {
                     return getIdAsDate(id);
                 case BOOLEAN:
                     return getIdAsBoolean(id);
+                case NULL:
+                    break;
+                default:
+                    break;
             }
         } catch (IllegalArgumentException iar) {
             throw new UnsupportedDocumentIdException(iar);

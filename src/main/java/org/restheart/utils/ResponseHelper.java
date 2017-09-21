@@ -69,7 +69,7 @@ public class ResponseHelper {
             Throwable t) {
         context.setResponseStatusCode(code);
 
-        String httpStatusText = HttpStatus.getStatusText(code);
+        String httpStatusText = HttpStatus.getReasonPhrase(code);
 
         context.setInError(true);
 

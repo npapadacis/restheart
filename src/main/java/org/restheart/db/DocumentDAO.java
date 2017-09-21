@@ -17,20 +17,14 @@
  */
 package org.restheart.db;
 
-import com.mongodb.MongoClient;
-import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.DeleteManyModel;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import com.mongodb.client.model.UpdateManyModel;
-import com.mongodb.client.model.WriteModel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonObjectId;
@@ -40,16 +34,21 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.restheart.utils.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.mongodb.MongoClient;
+import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.DeleteManyModel;
+import com.mongodb.client.model.UpdateManyModel;
+import com.mongodb.client.model.WriteModel;
 
 /**
  *
  * @author Andrea Di Cesare {@literal <andrea@softinstigate.com>}
  */
 public class DocumentDAO implements DocumentRepository {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(DocumentDAO.class);
 
     private final MongoClient client;
 
@@ -85,7 +84,6 @@ public class DocumentDAO implements DocumentRepository {
      * @return the HttpStatus code
      */
     @Override
-    @SuppressWarnings("unchecked")
     public OperationResult upsertDocument(
             final String dbName,
             final String collName,
@@ -180,7 +178,6 @@ public class DocumentDAO implements DocumentRepository {
      * @return
      */
     @Override
-    @SuppressWarnings("unchecked")
     public OperationResult upsertDocumentPost(
             final String dbName,
             final String collName,
@@ -253,7 +250,6 @@ public class DocumentDAO implements DocumentRepository {
      * @return
      */
     @Override
-    @SuppressWarnings("unchecked")
     public BulkOperationResult bulkUpsertDocumentsPost(
             final String dbName,
             final String collName,

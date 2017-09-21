@@ -100,8 +100,6 @@ public class DocumentRepresentationFactory {
 
         BsonValue id = data.get("_id");
 
-        String _docIdType = null;
-
         if (context.isFullHalMode()) {
             rep = new Representation(URLUtils.getReferenceLink(context, URLUtils.getParentPath(href), id));
         } else {
@@ -130,13 +128,8 @@ public class DocumentRepresentationFactory {
         }
 
         if (isBinaryFile(data)) {
-            if (_docIdType == null) {
-                rep.addLink(new Link("rh:data",
-                        String.format("%s/%s", href, RequestContext.BINARY_CONTENT)));
-            } else {
-                rep.addLink(new Link("rh:data",
-                        String.format("%s/%s?%s", href, RequestContext.BINARY_CONTENT, _docIdType)));
-            }
+            rep.addLink(new Link("rh:data",
+                    String.format("%s/%s", href, RequestContext.BINARY_CONTENT)));
         }
 
         // link templates

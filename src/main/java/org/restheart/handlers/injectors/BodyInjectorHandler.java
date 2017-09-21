@@ -1,34 +1,35 @@
 /*
  * RESTHeart - the Web API for MongoDB
  * Copyright (C) SoftInstigate Srl
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.restheart.handlers.injectors;
 
-import com.mongodb.util.JSONParseException;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.form.FormData;
 import io.undertow.server.handlers.form.FormDataParser;
 import io.undertow.server.handlers.form.FormParserFactory;
 import io.undertow.util.HeaderValues;
 import io.undertow.util.Headers;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import org.apache.tika.Tika;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
@@ -36,16 +37,16 @@ import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.json.JsonParseException;
 import org.restheart.hal.Representation;
-import org.restheart.hal.UnsupportedDocumentIdException;
 import org.restheart.handlers.PipedHttpHandler;
 import org.restheart.handlers.RequestContext;
 import org.restheart.utils.ChannelReader;
 import org.restheart.utils.HttpStatus;
 import org.restheart.utils.JsonUtils;
 import org.restheart.utils.ResponseHelper;
-import org.restheart.utils.URLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.mongodb.util.JSONParseException;
 
 /**
  *
@@ -534,19 +535,5 @@ public class BodyInjectorHandler extends PipedHttpHandler {
         context.setContent(content);
 
         next(exchange, context);
-    }
-
-    private BsonValue checkIdType(BsonDocument doc)
-            throws UnsupportedDocumentIdException {
-
-        if (doc.containsKey(_ID)) {
-            BsonValue _id = doc.get(_ID);
-
-            URLUtils.checkId(_id);
-
-            return _id;
-        } else {
-            return null;
-        }
     }
 }

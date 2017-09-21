@@ -1,17 +1,17 @@
 /*
  * RESTHeart - the Web API for MongoDB
  * Copyright (C) SoftInstigate Srl
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -42,12 +42,12 @@ public class BulkPatchDocumentsHandler extends PipedHttpHandler {
         super(null);
         this.documentDAO = documentDAO;
     }
-    
+
     public BulkPatchDocumentsHandler(PipedHttpHandler next) {
         super(next);
         this.documentDAO = new DocumentDAO();
     }
-    
+
     public BulkPatchDocumentsHandler(PipedHttpHandler next, DocumentDAO documentDAO) {
         super(next);
         this.documentDAO = documentDAO;
@@ -60,17 +60,16 @@ public class BulkPatchDocumentsHandler extends PipedHttpHandler {
      * @throws Exception
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void handleRequest(HttpServerExchange exchange, RequestContext context) throws Exception {
         if (context.isInError()) {
             next(exchange, context);
             return;
         }
-        
+
         BulkOperationResult result = this.documentDAO
                 .bulkPatchDocuments(
-                        context.getDBName(), 
-                        context.getCollectionName(), 
+                        context.getDBName(),
+                        context.getCollectionName(),
                         context.getFiltersDocument(),
                         context.getShardKey(),
                         context.getContent().asDocument());
